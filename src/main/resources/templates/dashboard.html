@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<object th:replace="head :: head" th:remove="tag"></object>
+<meta charset="UTF-8" />
+
+</head>
+<body>
+	<script th:inline="javascript">
+		$(document).ready(function() {
+			$("#groups a").click(function() {
+				var groupIdString = $(this).attr('id');
+				var groupIdNumber = groupIdString.substring('group'.length, groupIdString.length);
+;				$.ajax({
+					type: "POST",
+					url:"/setRead",
+					data: {
+						groupId: groupIdNumber
+					},
+					success: function(data) {
+						var selector = "#unread" + groupIdNumber;
+						$(selector).html(data);
+					}
+				})
+
+			});
+
+		});
+	</script>
+	<div style="margin: 20px;">
+		<h3>Dashboard</h3>
+		<div class="pull-right">
+			<p>
+				Logged in as: <strong><span
+					th:text="|${currentUser.name} ${currentUser.surname}|">Вася
+						Иванов</span></strong>
+			</p>
+		</div>
+		<ul class="nav nav-tabs">
+			<li class="active"><a href="#addGroupTab"
+				aria-controls="addGroupTab" role="tab" data-toggle="tab">Добавить
+					группу</a></li>
+			<li><a href="#statusTab" aria-controls="statusTab" role="tab"
+				data-toggle="tab">Просмотреть статус</a></li>
+		</ul>
+		<div class="tab-content col-md-12">
+			<div role="tabpanel" class="row tab-pane fade in active col-md-12"
+				id="addGroupTab">
+				<h3>Добавление групп</h3>
+
+				<div class="col-md-4 col-md-offset-4">
+					<form role="form" action="addGroup" method="post">
+						<div class="form-group">
+							<label for="groupNameInput">Имя группы:</label> <input
+								type="text" class="form-control" name="name" id="groupNameInput" />
+						</div>
+						<div class="form-group">
+							<label for="groupUrlInput">URL:</label> <input type="url"
+								class="form-control" name="url" id="groupUrlInput" />
+						</div>
+						<button type="submit" class="btn btn-default">Добавить</button>
+					</form>
+				</div>
+			</div>
+
+
+			<div role="tabpanel" class="row tab-pane fade col-md-12"
+				id="statusTab">
+				<h3>Статус групп</h3>
+
+				<div class="col-md-6 col-md-offset-3">
+					<ul class="list-group" id="groups">
+
+						<li th:each="message : ${messageStats}" class="list-group-item">
+							<span th:id="unread + ${message.vkGroup.id}" class="badge pull-right"
+							th:text="${message.vkGroup.totalMessages - message.readMessages}">12</span>
+
+							<a th:id="group + ${message.vkGroup.id}"
+							th:href="${message.vkGroup.url}"><span
+								th:text="${message.vkGroup.name}"></span></a><br /> <span
+							th:text="${message.isSubscriber}? 'Вы подписаны на эту группу' : 'Вы не подписаны на эту группу'"></span>
+						</li>
+					</ul>
+				</div>
+
+
+
+				<ul>
+
+				</ul>
+			</div>
+
+		</div>
+	</div>
+</body>
+</html>
