@@ -28,14 +28,18 @@
 		});
 	</script>
 	<div style="margin: 20px;">
-		<h3>Dashboard</h3>
 		<div class="pull-right">
 			<p>
 				Logged in as: <strong><span
 					th:text="|${currentUser.name} ${currentUser.surname}|">Вася
 						Иванов</span></strong>
 			</p>
+			<form action="/logout" method="post">
+			<button class="btn btn-sm btn-primary pull-right" type="submit">Logout</button>
+			</form>
 		</div>
+		<h3>Dashboard</h3>
+		
 		<ul class="nav nav-tabs">
 			<li class="active"><a href="#addGroupTab"
 				aria-controls="addGroupTab" role="tab" data-toggle="tab">Добавить

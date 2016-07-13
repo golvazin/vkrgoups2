@@ -68,6 +68,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         .authorizeRequests()
         .antMatchers("/", "/login**", "/webjars/**", "/error").permitAll()
         .anyRequest().authenticated()
+        .and().logout().logoutSuccessUrl("/").permitAll()
         .and().addFilterBefore(ssoFilter(), BasicAuthenticationFilter.class);
   
     }

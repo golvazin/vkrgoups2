@@ -24,9 +24,10 @@ public class ExceptionHandler implements ErrorController {
         String url = "";
         HttpSession session = request.getSession(true);
         OAuth2ClientContext oAuth2ClientContext = (OAuth2ClientContext) session.getAttribute("scopedTarget.oauth2ClientContext");
-        if (oAuth2ClientContext == null) {
+        if (oAuth2ClientContext == null || oAuth2ClientContext.getAccessToken() == null) {
             url = "/";
         } else {
+
             url = "/dashboard";
         }
 
