@@ -10,6 +10,8 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.oauth2.client.OAuth2ClientContext;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -18,6 +20,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import vkgroups2.domain.User;
 import vkgroups2.exception.ServiceException;
+import vkgroups2.exception.VKMethodException;
 
 
 @Service
@@ -25,6 +28,8 @@ public class VKApiHelper {
     
     private static final String VERSION = "5.52";
     private static final String METHOD_URI = "https://api.vk.com/method/";
+    
+
     public VKApiHelper() {
         
     }
@@ -42,7 +47,7 @@ public class VKApiHelper {
     
     public boolean checkMembership(String groupUrl, String userId) {
 
-        String url = String.format(METHOD_URI + "groups.isMember?group_id=%s" 
+        String url = String.format(METHOD_URI + "groups.isMember?group_id=%s"
                 + "&user_id=%s" + "&v=%s", extractGroupIdFormUrl(groupUrl),
                 userId, VERSION);
         String vkMethodResponse = applyVKMethod(url);
@@ -51,7 +56,8 @@ public class VKApiHelper {
     }
     
     public int retrieveGroupMessages(String groupUrl) {
-        String url = String.format(METHOD_URI + "wall.get?domain=%s&count=1", extractGroupIdFormUrl(groupUrl));
+        String url = String.format(METHOD_URI + "wall.get?domain=%s&count=1", 
+                extractGroupIdFormUrl(groupUrl));
         return extractMessagesCount(applyVKMethod(url));
     }
     
@@ -61,6 +67,7 @@ public class VKApiHelper {
         if (responseBody == null || responseBody.size() == 0) {
             throw new ServiceException("No info found");
         } else {
+
             return extractResponseContent(responseBody.get(0));
         }
     }
@@ -96,8 +103,18 @@ public class VKApiHelper {
     private String extractResponseContent(String json) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            JsonNode response = objectMapper.readTree(json).findValue("response");
-            return response.toString();
+            JsonNode response = objectMapper.readTree(json).findValue("error");
+            if (response != null) {
+                throw new VKMethodException(response.findValue("error_msg").toString());
+            }
+            response = objectMapper.readTree(json).findValue("response");
+            if (response != null) {
+                return response.toString();
+            } else {
+                throw new VKMethodException("Invalid response");
+                
+            }
+            
         } catch (IOException e) {
             throw new ServiceException("Could not process json", e);
         }

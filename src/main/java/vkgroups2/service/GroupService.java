@@ -67,9 +67,7 @@ public class GroupService {
     }
 
 
-    /**
-     * 
-     */
+
     public void saveGroup(String name, String url, String userId) {
         VKGroup group = groupRepository.findOneByUrl(url);
         User currentUser = userRepository.findOne(userId);
@@ -79,6 +77,9 @@ public class GroupService {
             userGroupStat = new UserGroupStat(currentUser, group);
         } else {
             userGroupStat = userGroupStatRepository.findOneByUserAndVkGroup(currentUser, group);
+            if (userGroupStat == null) {
+                userGroupStat = new UserGroupStat(currentUser, group);
+            }
         }
         group = checkAndSetMessages(group);
         boolean isSubscribed = vkApiHelper.checkMembership(group.getUrl(), currentUser.getVkId());
